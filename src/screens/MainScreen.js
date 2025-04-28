@@ -1,26 +1,38 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TextInput, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, SafeAreaView, Alert, Dimensions } from 'react-native';
 import { useCart } from '../context/CartContext';
 import { menuData } from '../data/menuData';
+import Icon from 'react-native-vector-icons/Ionicons';
+
+const { width } = Dimensions.get('window');
+const itemWidth = (width - 48) / 2; // 2 items per row with padding
 
 const MenuItem = ({ item, onAddToCart }) => (
   <TouchableOpacity 
     style={styles.menuItem}
     onPress={() => onAddToCart(item)}
   >
-    <Image 
-      source={item.image} 
-      style={styles.menuImage}
-      resizeMode="cover"
-    />
-    <Text style={styles.menuName}>{item.name}</Text>
-    <Text style={styles.menuPrice}>฿ {item.price} บาท</Text>
+    <View style={styles.imageContainer}>
+      <Image 
+        source={item.image} 
+        style={styles.menuImage}
+        resizeMode="cover"
+      />
+      <TouchableOpacity 
+        style={styles.addButton}
+        onPress={() => onAddToCart(item)}
+      >
+        <Icon name="add-circle" size={32} color="#3C2C1C" />
+      </TouchableOpacity>
+    </View>
+    <View style={styles.itemInfo}>
+      <Text style={styles.menuName}>{item.name}</Text>
+      <Text style={styles.menuPrice}>฿ {item.price}</Text>
+    </View>
   </TouchableOpacity>
 );
 
 const MainScreen = () => {
-  const [searchQuery, setSearchQuery] = useState('');
   const { addToCart } = useCart();
 
   const handleAddToCart = (item) => {
@@ -44,26 +56,30 @@ const MainScreen = () => {
       </View>
 
       <ScrollView style={styles.scrollView}>
-        <Text style={styles.sectionTitle}>Main dish</Text>
-        <View style={styles.menuGrid}>
-          {menuData.mainDishes.map((item) => (
-            <MenuItem 
-              key={item.id} 
-              item={item} 
-              onAddToCart={handleAddToCart}
-            />
-          ))}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>mainDishes</Text>
+          <View style={styles.menuGrid}>
+            {menuData.mainDishes.map((item) => (
+              <MenuItem 
+                key={item.id} 
+                item={item} 
+                onAddToCart={handleAddToCart}
+              />
+            ))}
+          </View>
         </View>
 
-        <Text style={styles.sectionTitle}>Dessert</Text>
-        <View style={styles.menuGrid}>
-          {menuData.desserts.map((item) => (
-            <MenuItem 
-              key={item.id} 
-              item={item} 
-              onAddToCart={handleAddToCart}
-            />
-          ))}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>desserts</Text>
+          <View style={styles.menuGrid}>
+            {menuData.desserts.map((item) => (
+              <MenuItem 
+                key={item.id} 
+                item={item} 
+                onAddToCart={handleAddToCart}
+              />
+            ))}
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -79,9 +95,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 16,
     backgroundColor: '#FFF5EB',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8E8E8',
   },
   headerTitle: {
     fontSize: 24,
@@ -91,58 +108,61 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  section: {
     padding: 16,
-    gap: 12,
-  },
-  menuIcon: {
-    padding: 8,
-  },
-  searchBox: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 24,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  searchInput: {
-    flex: 1,
-    marginLeft: 8,
-    fontSize: 16,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    padding: 16,
-    paddingBottom: 8,
-    color: '3C2C1C'
+    color: '#3C2C1C',
+    marginBottom: 16,
   },
   menuGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    padding: 8,
+    justifyContent: 'space-between',
   },
   menuItem: {
-    width: '50%',
-    padding: 8,
+    width: itemWidth,
+    marginBottom: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    overflow: 'hidden',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  imageContainer: {
+    position: 'relative',
+    width: '100%',
+    height: itemWidth,
   },
   menuImage: {
     width: '100%',
-    height: 150,
-    borderRadius: 12,
-    marginBottom: 8,
+    height: '100%',
+  },
+  addButton: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 16,
+    padding: 4,
+  },
+  itemInfo: {
+    padding: 12,
   },
   menuName: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
+    color: '#3C2C1C',
+    marginBottom: 4,
   },
   menuPrice: {
     fontSize: 14,
-    color: '#666',
+    color: '#666666',
   },
 });
 

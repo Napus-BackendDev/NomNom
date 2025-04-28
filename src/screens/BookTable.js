@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert, Dimensions } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useReservation } from '../context/ReservationContext';
 import { useNavigation } from '@react-navigation/native';
+
+const { width } = Dimensions.get('window');
 
 const BookTable = () => {
   const [date, setDate] = useState(new Date());
@@ -17,7 +19,7 @@ const BookTable = () => {
   const navigation = useNavigation();
 
   const tables = [1, 2, 3, 4, 5, 6, 7, 8];
-  const unavailableTables = [6]; // Example of an unavailable table
+  const unavailableTables = [6];
 
   const formatDate = (date) => {
     return date.toLocaleDateString('en-GB', {
@@ -71,17 +73,24 @@ const BookTable = () => {
       </View>
 
       <View style={styles.content}>
-        {/* Date Selection */}
-        <TouchableOpacity 
-          style={styles.selectionRow}
-          onPress={() => setShowDatePicker(true)}
-        >
-          <View style={styles.iconLabel}>
+        {/* Date and Time Selection */}
+        <View style={styles.datetimeContainer}>
+          <TouchableOpacity 
+            style={styles.datetimeButton}
+            onPress={() => setShowDatePicker(true)}
+          >
             <Icon name="calendar" size={24} color="#3C2C1C" />
-            <Text style={styles.label}>Select Date</Text>
-          </View>
-          <Text style={styles.valueText}>{formatDate(date)}</Text>
-        </TouchableOpacity>
+            <Text style={styles.datetimeText}>{formatDate(date)}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.datetimeButton}
+            onPress={() => setShowTimePicker(true)}
+          >
+            <Icon name="clock-outline" size={24} color="#3C2C1C" />
+            <Text style={styles.datetimeText}>{formatTime(time)}</Text>
+          </TouchableOpacity>
+        </View>
 
         {showDatePicker && (
           <DateTimePicker
@@ -92,18 +101,6 @@ const BookTable = () => {
           />
         )}
 
-        {/* Time Selection */}
-        <TouchableOpacity 
-          style={styles.selectionRow}
-          onPress={() => setShowTimePicker(true)}
-        >
-          <View style={styles.iconLabel}>
-            <Icon name="clock-outline" size={24} color="#3C2C1C" />
-            <Text style={styles.label}>Select Time</Text>
-          </View>
-          <Text style={styles.valueText}>{formatTime(time)}</Text>
-        </TouchableOpacity>
-
         {showTimePicker && (
           <DateTimePicker
             value={time}
@@ -113,82 +110,76 @@ const BookTable = () => {
         )}
 
         {/* Number of Guests */}
-        <View style={styles.selectionRow}>
-          <View style={styles.iconLabel}>
-            <Icon name="account-group" size={24} color="#3C2C1C" />
-            <Text style={styles.label}>Number of Guests</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Number of Guests</Text>
+          <View style={styles.guestButtons}>
+            {[2, 4, 6].map((number) => (
+              <TouchableOpacity 
+                key={number}
+                style={[
+                  styles.guestButton,
+                  guests === number && styles.selectedGuestButton
+                ]}
+                onPress={() => setGuests(number)}
+              >
+                <Text style={[
+                  styles.guestButtonText,
+                  guests === number && styles.selectedGuestText
+                ]}>{number}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
-          <Text style={styles.valueText}>{guests}</Text>
-        </View>
-
-        <View style={styles.guestButtons}>
-          <TouchableOpacity 
-            style={[styles.guestButton, guests === 2 && styles.selectedGuest]}
-            onPress={() => setGuests(2)}
-          >
-            <Text style={styles.guestButtonText}>2</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.guestButton, guests === 4 && styles.selectedGuest]}
-            onPress={() => setGuests(4)}
-          >
-            <Text style={styles.guestButtonText}>4</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.guestButton, guests === 6 && styles.selectedGuest]}
-            onPress={() => setGuests(6)}
-          >
-            <Text style={styles.guestButtonText}>6</Text>
-          </TouchableOpacity>
         </View>
 
         {/* Table Selection */}
-        <View style={styles.selectionRow}>
-          <View style={styles.iconLabel}>
-            <Icon name="table-furniture" size={24} color="#3C2C1C" />
-            <Text style={styles.label}>Choose your Table</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Choose your Table</Text>
+          <View style={styles.tableGrid}>
+            {tables.map((table) => (
+              <TouchableOpacity
+                key={table}
+                style={[
+                  styles.tableButton,
+                  selectedTable === table && styles.selectedTable,
+                  unavailableTables.includes(table) && styles.unavailableTable
+                ]}
+                onPress={() => !unavailableTables.includes(table) && setSelectedTable(table)}
+                disabled={unavailableTables.includes(table)}
+              >
+                <Icon 
+                  name="table-furniture" 
+                  size={24} 
+                  color={selectedTable === table ? '#FFFFFF' : '#3C2C1C'} 
+                />
+                <Text style={[
+                  styles.tableButtonText,
+                  selectedTable === table && styles.selectedTableText,
+                  unavailableTables.includes(table) && styles.unavailableTableText
+                ]}>Table {table}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
-        </View>
-
-        <View style={styles.tableGrid}>
-          {tables.map((table) => (
-            <TouchableOpacity
-              key={table}
-              style={[
-                styles.tableButton,
-                selectedTable === table && styles.selectedTable,
-                unavailableTables.includes(table) && styles.unavailableTable
-              ]}
-              onPress={() => !unavailableTables.includes(table) && setSelectedTable(table)}
-              disabled={unavailableTables.includes(table)}
-            >
-              <Text style={[
-                styles.tableButtonText,
-                selectedTable === table && styles.selectedTableText,
-                unavailableTables.includes(table) && styles.unavailableTableText
-              ]}>{table}</Text>
-            </TouchableOpacity>
-          ))}
         </View>
 
         {/* Special Request */}
-        <View style={styles.selectionRow}>
-          <View style={styles.iconLabel}>
-            <Icon name="pencil" size={24} color="#3C2C1C" />
-            <Text style={styles.label}>Special Request</Text>
-          </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Special Request</Text>
+          <TextInput
+            style={styles.specialRequestInput}
+            multiline
+            numberOfLines={4}
+            value={specialRequest}
+            onChangeText={setSpecialRequest}
+            placeholder="Enter your special request here..."
+            placeholderTextColor="#999999"
+          />
         </View>
-        <TextInput
-          style={styles.specialRequestInput}
-          multiline
-          numberOfLines={4}
-          value={specialRequest}
-          onChangeText={setSpecialRequest}
-          placeholder="Enter your special request here..."
-        />
 
         {/* Book Button */}
-        <TouchableOpacity style={styles.bookButton} onPress={handleBook}>
+        <TouchableOpacity 
+          style={styles.bookButton} 
+          onPress={handleBook}
+        >
           <Text style={styles.bookButtonText}>Book Now</Text>
         </TouchableOpacity>
       </View>
@@ -205,9 +196,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 16,
     backgroundColor: '#FFF5EB',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8E8E8',
   },
   headerTitle: {
     fontSize: 24,
@@ -217,61 +209,83 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
   },
-  selectionRow: {
+  datetimeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginVertical: 12,
+    marginBottom: 24,
   },
-  iconLabel: {
+  datetimeButton: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: 12,
+    marginHorizontal: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  label: {
-    fontSize: 18,
+  datetimeText: {
     marginLeft: 12,
-    color: '#3C2C1C',
-  },
-  valueText: {
     fontSize: 16,
     color: '#3C2C1C',
-    backgroundColor: '#FFF5EB',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#3C2C1C',
+    marginBottom: 16,
   },
   guestButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: 12,
+    justifyContent: 'space-between',
   },
   guestButton: {
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    backgroundColor: '#FFF5EB',
-    borderRadius: 8,
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: 12,
+    marginHorizontal: 8,
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  selectedGuest: {
+  selectedGuestButton: {
     backgroundColor: '#3C2C1C',
   },
   guestButtonText: {
     fontSize: 18,
     color: '#3C2C1C',
   },
+  selectedGuestText: {
+    color: '#FFFFFF',
+  },
   tableGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginVertical: 12,
   },
   tableButton: {
-    width: '23%',
-    aspectRatio: 1.5,
-    backgroundColor: '#E8F3E8',
-    justifyContent: 'center',
+    width: (width - 48) / 2,
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
     alignItems: 'center',
-    borderRadius: 8,
-    marginBottom: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   selectedTable: {
     backgroundColor: '#3C2C1C',
@@ -280,7 +294,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0E0E0',
   },
   tableButtonText: {
-    fontSize: 20,
+    marginTop: 8,
+    fontSize: 16,
     color: '#3C2C1C',
   },
   selectedTableText: {
@@ -291,23 +306,32 @@ const styles = StyleSheet.create({
   },
   specialRequestInput: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    padding: 12,
-    marginVertical: 12,
-    minHeight: 100,
+    borderRadius: 12,
+    padding: 16,
+    minHeight: 120,
     textAlignVertical: 'top',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   bookButton: {
     backgroundColor: '#3C2C1C',
-    paddingVertical: 16,
-    borderRadius: 8,
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
     marginTop: 24,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   bookButtonText: {
     color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
-    textAlign: 'center',
   },
 });
 

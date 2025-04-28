@@ -20,9 +20,9 @@ export const menuData = {
     },
     {
       id: '4',
-      name: 'แกงเขียวหวาน',
-      price: 100,
-      image: require('../../assets/greencurry.jpg')
+      name: 'ข้าวหมกไก่',
+      price: 50,
+      image: require('../../assets/khaomannkai.jpg')
     }
   ],
   desserts: [
